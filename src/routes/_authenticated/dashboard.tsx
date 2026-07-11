@@ -72,17 +72,45 @@ function DashboardPage() {
             </Card>
           </div>
 
-          {(admin || head) && (
+          {admin && (
+            <Card className="surface-1">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-primary" />
+                  <CardTitle className="font-display text-lg">Super Admin Center</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="grid gap-2 sm:grid-cols-2">
+                <Link to="/admin/applications" className="block">
+                  <Button className="w-full">Review applications</Button>
+                </Link>
+                <Link to="/departments" className="block">
+                  <Button variant="outline" className="w-full">Manage departments</Button>
+                </Link>
+                <Link to="/admin/team" className="block">
+                  <Button variant="outline" className="w-full">Manage team</Button>
+                </Link>
+                <Link to="/announcements" className="block">
+                  <Button variant="outline" className="w-full">Post announcements</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+
+          {(head && !admin) && (
             <Card className="surface-1">
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  <CardTitle className="font-display text-lg">Admin quick actions</CardTitle>
+                  <CardTitle className="font-display text-lg">Department Head Actions</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="flex flex-wrap gap-2">
-                <Link to="/admin/applications">
-                  <Button>Review applications</Button>
+              <CardContent className="grid gap-2 sm:grid-cols-2">
+                <Link to="/admin/applications" className="block">
+                  <Button className="w-full">Review applications</Button>
+                </Link>
+                <Link to="/projects" className="block">
+                  <Button variant="outline" className="w-full">Manage projects</Button>
                 </Link>
               </CardContent>
             </Card>
