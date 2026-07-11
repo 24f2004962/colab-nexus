@@ -1,6 +1,6 @@
 
 -- Projects
-CREATE TABLE public.projects (
+CREATE TABLE IF NOT EXISTS public.projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT,
@@ -20,7 +20,7 @@ CREATE POLICY projects_delete_owner_or_admin ON public.projects FOR DELETE TO au
 CREATE TRIGGER trg_projects_updated BEFORE UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Tasks
-CREATE TABLE public.tasks (
+CREATE TABLE IF NOT EXISTS public.tasks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
@@ -43,7 +43,7 @@ CREATE POLICY tasks_delete ON public.tasks FOR DELETE TO authenticated USING (au
 CREATE TRIGGER trg_tasks_updated BEFORE UPDATE ON public.tasks FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Announcements
-CREATE TABLE public.announcements (
+CREATE TABLE IF NOT EXISTS public.announcements (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   body TEXT NOT NULL,
@@ -63,7 +63,7 @@ CREATE POLICY ann_delete ON public.announcements FOR DELETE TO authenticated USI
 CREATE TRIGGER trg_ann_updated BEFORE UPDATE ON public.announcements FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Knowledge articles
-CREATE TABLE public.knowledge_articles (
+CREATE TABLE IF NOT EXISTS public.knowledge_articles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   content TEXT NOT NULL,
@@ -83,7 +83,7 @@ CREATE POLICY kn_delete ON public.knowledge_articles FOR DELETE TO authenticated
 CREATE TRIGGER trg_kn_updated BEFORE UPDATE ON public.knowledge_articles FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Events (calendar)
-CREATE TABLE public.events (
+CREATE TABLE IF NOT EXISTS public.events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
@@ -105,13 +105,35 @@ CREATE POLICY ev_delete ON public.events FOR DELETE TO authenticated USING (auth
 CREATE TRIGGER trg_ev_updated BEFORE UPDATE ON public.events FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Realtime
-ALTER TABLE public.projects REPLICA IDENTITY FULL;
-ALTER TABLE public.tasks REPLICA IDENTITY FULL;
-ALTER TABLE public.announcements REPLICA IDENTITY FULL;
-ALTER TABLE public.knowledge_articles REPLICA IDENTITY FULL;
-ALTER TABLE public.events REPLICA IDENTITY FULL;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.projects;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.tasks;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.announcements;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.knowledge_articles;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.events;
+DO $$ BEGIN
+  BEGIN
+    ALTER TABLE public.projects REPLICA IDENTITY FULL;
+  EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN
+    ALTER TABLE public.tasks REPLICA IDENTITY FULL;
+  EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN
+    ALTER TABLE public.announcements REPLICA IDENTITY FULL;
+  EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN
+    ALTER TABLE public.knowledge_articles REPLICA IDENTITY FULL;
+  EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN
+    ALTER TABLE public.events REPLICA IDENTITY FULL;
+  EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.projects;
+  EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.tasks;
+  EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.announcements;
+  EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.knowledge_articles;
+  EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.events;
+  EXCEPTION WHEN duplicate_object THEN NULL; END;
+END $$;
