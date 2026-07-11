@@ -19,5 +19,17 @@ export default defineConfig({
       strictPort: true,
       allowedHosts: true,
     },
+    optimizeDeps: {
+      exclude: [
+        'react-hook-form',
+        '@hookform/resolvers',
+        'zod',
+        'date-fns',
+        '@radix-ui/react-progress',
+        '@radix-ui/react-label',
+        '@radix-ui/react-checkbox',
+        '@radix-ui/react-select',
+      ],
+    },
   },
 });
