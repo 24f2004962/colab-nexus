@@ -79,6 +79,16 @@ function RegisterPage() {
       3: ["portfolio_url", "github_url", "linkedin_url", "resume_url", "skills", "bio", "experience", "availability"],
     };
     const valid = await form.trigger(fields[step]);
+    
+    // Validate resume is uploaded or URL provided for step 3
+    if (step === 3 && valid) {
+      const hasUrl = form.getValues("resume_url") && form.getValues("resume_url").length > 0;
+      if (!hasUrl && !resumeFile) {
+        toast.error("Please upload a resume or provide a URL");
+        return;
+      }
+    }
+    
     if (valid) setStep((s) => Math.min(s + 1, STEPS.length - 1));
   };
 
@@ -145,23 +155,77 @@ function RegisterPage() {
 
   if (done) {
     return (
-      <div className="min-h-screen hero-bg flex items-center justify-center px-4">
-        <Card className="glass max-w-md text-center animate-scale-in shadow-elegant">
-          <CardHeader>
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-success/20 text-success">
-              <CheckCircle2 className="h-8 w-8" />
-            </div>
-            <CardTitle className="mt-4 font-display text-2xl">Application received</CardTitle>
-            <CardDescription>
-              Your account is ready — no email verification needed. Our team will review your application and notify you once it's approved.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button onClick={() => navigate({ to: "/auth" })} className="w-full shadow-glow">
-              Go to sign in
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen hero-bg py-10 px-4 flex flex-col items-center justify-center">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-10 mx-auto h-[420px] max-w-3xl opacity-40 blur-3xl"
+          style={{ background: "var(--gradient-glow)" }}
+        />
+        <div className="max-w-2xl w-full space-y-6 animate-scale-in relative">
+          <Card className="glass shadow-elegant border-success/20 bg-success/5">
+            <CardHeader className="text-center">
+              <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-success/20 text-success mb-2">
+                <CheckCircle2 className="h-10 w-10" />
+              </div>
+              <CardTitle className="font-display text-4xl sm:text-3xl">Crazy thank you!</CardTitle>
+              <CardDescription className="text-base mt-3">
+                Your application has been received and we're thrilled about your interest in joining CoLab Nation! Our team will review your application and get back to you within 48 hours.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 sm:space-y-3">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <Button 
+                  onClick={() => navigate({ to: "/auth" })} 
+                  className="w-full shadow-glow"
+                  size="lg"
+                >
+                  Go to sign in
+                </Button>
+                <Button 
+                  onClick={() => window.open("https://www.linkedin.com/company/colab-nation/", "_blank")}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  Follow us on LinkedIn
+                </Button>
+              </div>
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 sm:p-3 text-center">
+                <p className="text-sm text-foreground font-medium">
+                  Keep up with our latest updates on <a href="https://www.linkedin.com/company/colab-nation/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">LinkedIn</a>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass shadow-elegant">
+            <CardHeader>
+              <CardTitle className="font-display text-lg">What happens next?</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex gap-3">
+                <div className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-primary/20 text-primary text-sm font-semibold">1</div>
+                <div>
+                  <p className="font-medium">Review stage</p>
+                  <p className="text-sm text-muted-foreground">Our team evaluates your application</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-primary/20 text-primary text-sm font-semibold">2</div>
+                <div>
+                  <p className="font-medium">Interview (if selected)</p>
+                  <p className="text-sm text-muted-foreground">We'll schedule a chat with you</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-primary/20 text-primary text-sm font-semibold">3</div>
+                <div>
+                  <p className="font-medium">Decision & Onboarding</p>
+                  <p className="text-sm text-muted-foreground">Get ready to make an impact!</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -201,35 +265,43 @@ function RegisterPage() {
               )}
               {step === 1 && (
                 <div className="space-y-4 animate-fade-in">
-                  <Field label="Phone (optional)"><Input {...form.register("phone")} placeholder="+91…" /></Field>
-                  <Field label="College / Organization"><Input {...form.register("college")} /></Field>
-                  <Field label="City"><Input {...form.register("city")} /></Field>
+                  <Field label="Phone *" error={form.formState.errors.phone?.message}><Input {...form.register("phone")} placeholder="+91…" /></Field>
+                  <Field label="College / Organization *" error={form.formState.errors.college?.message}><Input {...form.register("college")} placeholder="e.g., Indian Institute of Technology" /></Field>
+                  <Field label="City"><Input {...form.register("city")} placeholder="Your city" /></Field>
                 </div>
               )}
               {step === 2 && (
                 <div className="space-y-4 animate-fade-in">
-                  <Field label="Department applying for" error={form.formState.errors.department_applied?.message}>
-                    <Select value={form.watch("department_applied")} onValueChange={(v) => form.setValue("department_applied", v as RegistrationInput["department_applied"])}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {DEPARTMENTS.map((d) => (
-                          <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
+                  <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+                    {DEPARTMENTS.map((d) => (
+                      <label key={d} className="group relative flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-surface/50 px-3 sm:px-4 py-3 text-sm hover:border-primary/50 transition">
+                        <input
+                          type="radio"
+                          name="department_applied"
+                          value={d}
+                          checked={form.watch("department_applied") === d}
+                          onChange={() => form.setValue("department_applied", d, { shouldValidate: true })}
+                          className="h-4 w-4"
+                        />
+                        <span className="text-xs sm:text-sm">{DEPT_LABEL[d]}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               )}
               {step === 3 && (
                 <div className="space-y-4 animate-fade-in">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Portfolio URL"><Input {...form.register("portfolio_url")} placeholder="https://…" /></Field>
-                    <Field label="GitHub URL"><Input {...form.register("github_url")} placeholder="https://github.com/…" /></Field>
-                    <Field label="LinkedIn URL"><Input {...form.register("linkedin_url")} placeholder="https://linkedin.com/…" /></Field>
-                    <Field label="Resume URL (or upload below)"><Input {...form.register("resume_url")} placeholder="Link to PDF" /></Field>
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 p-3 text-sm text-amber-900 dark:text-amber-100">
+                    Resume is <strong>required</strong> — Upload a PDF/DOC or provide a link
                   </div>
-                  <Field label="Upload resume (PDF/DOC · optional)">
-                    <label className="group relative flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-border bg-surface/50 px-4 py-3 text-sm hover:border-primary/50 transition">
+                  <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+                    <Field label="Portfolio URL"><Input {...form.register("portfolio_url")} placeholder="https://…" className="text-xs sm:text-sm" /></Field>
+                    <Field label="GitHub URL"><Input {...form.register("github_url")} placeholder="github.com/…" className="text-xs sm:text-sm" /></Field>
+                    <Field label="LinkedIn URL"><Input {...form.register("linkedin_url")} placeholder="linkedin.com/in/…" className="text-xs sm:text-sm" /></Field>
+                    <Field label="Resume URL *" error={form.formState.errors.resume_url?.message}><Input {...form.register("resume_url")} placeholder="Link to resume" className="text-xs sm:text-sm" /></Field>
+                  </div>
+                  <Field label="Upload resume (PDF/DOC) *" error={!resumeFile && form.formState.isDirty ? "Resume upload required" : undefined}>
+                    <label className={`group relative flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed transition ${resumeFile ? "border-primary bg-primary/5" : "border-border bg-surface/50 hover:border-primary/50"}`}>
                       <input
                         type="file"
                         accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -239,7 +311,7 @@ function RegisterPage() {
                       {resumeFile ? (
                         <>
                           <FileText className="h-4 w-4 text-primary" />
-                          <span className="truncate">{resumeFile.name}</span>
+                          <span className="truncate font-medium">{resumeFile.name}</span>
                           <span className="ml-auto text-xs text-muted-foreground">{Math.round(resumeFile.size / 1024)} KB</span>
                         </>
                       ) : (
@@ -251,19 +323,21 @@ function RegisterPage() {
                     </label>
                   </Field>
                   <Field label="Skills (comma separated)"><Input {...form.register("skills")} placeholder="React, Figma, Marketing…" /></Field>
-                  <Field label="Short bio"><Textarea rows={3} {...form.register("bio")} /></Field>
-                  <Field label="Experience"><Textarea rows={3} {...form.register("experience")} /></Field>
+                  <Field label="Short bio"><Textarea rows={3} {...form.register("bio")} placeholder="Tell us about yourself" /></Field>
+                  <Field label="Experience"><Textarea rows={3} {...form.register("experience")} placeholder="Your professional experience and achievements" /></Field>
                   <Field label="Availability"><Input {...form.register("availability")} placeholder="10 hrs / week" /></Field>
                 </div>
               )}
               {step === 4 && (
                 <div className="space-y-4 animate-fade-in">
-                  <div className="rounded-lg border border-border bg-surface p-4 text-sm">
-                    <div className="grid gap-1 sm:grid-cols-2">
-                      <ReviewRow label="Name" value={form.getValues("full_name")} />
+                  <div className="rounded-lg border border-border p-4 sm:p-6 bg-surface/50 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+                    <div className="space-y-3">
+                      <ReviewRow label="Full name" value={form.getValues("full_name")} />
                       <ReviewRow label="Email" value={form.getValues("email")} />
-                      <ReviewRow label="Department" value={DEPARTMENTS.find(d => d.value === form.getValues("department_applied"))?.label ?? ""} />
-                      <ReviewRow label="City" value={form.getValues("city")} />
+                      <ReviewRow label="Department" value={DEPT_LABEL[form.getValues("department_applied")]} />
+                      <ReviewRow label="Phone" value={form.getValues("phone")} />
+                    </div>
+                    <div className="space-y-3">
                       <ReviewRow label="College" value={form.getValues("college")} />
                     </div>
                   </div>

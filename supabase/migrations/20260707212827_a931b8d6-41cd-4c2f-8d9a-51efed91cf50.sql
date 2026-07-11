@@ -1,39 +1,55 @@
 
 -- ============ ENUMS ============
-CREATE TYPE public.app_role AS ENUM (
-  'super_admin',
-  'technical_head',
-  'content_head',
-  'marketing_head',
-  'pr_head',
-  'event_head',
-  'member'
-);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_role') THEN
+    CREATE TYPE public.app_role AS ENUM (
+      'super_admin',
+      'technical_head',
+      'content_head',
+      'marketing_head',
+      'pr_head',
+      'event_head',
+      'member'
+    );
+  END IF;
+END $$;
 
-CREATE TYPE public.department AS ENUM (
-  'technical',
-  'content_design',
-  'marketing',
-  'pr',
-  'events'
-);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'department') THEN
+    CREATE TYPE public.department AS ENUM (
+      'technical',
+      'content_design',
+      'marketing',
+      'pr',
+      'events'
+    );
+  END IF;
+END $$;
 
-CREATE TYPE public.application_status AS ENUM (
-  'pending',
-  'under_review',
-  'interview',
-  'assignment',
-  'accepted',
-  'rejected',
-  'onboarded'
-);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'application_status') THEN
+    CREATE TYPE public.application_status AS ENUM (
+      'pending',
+      'under_review',
+      'interview',
+      'assignment',
+      'accepted',
+      'rejected',
+      'onboarded'
+    );
+  END IF;
+END $$;
 
-CREATE TYPE public.member_status AS ENUM (
-  'pending_approval',
-  'active',
-  'rejected',
-  'disabled'
-);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'member_status') THEN
+    CREATE TYPE public.member_status AS ENUM (
+      'pending_approval',
+      'active',
+      'rejected',
+      'disabled'
+    );
+  END IF;
+END $$;
 
 -- ============ UPDATED_AT HELPER ============
 CREATE OR REPLACE FUNCTION public.set_updated_at()

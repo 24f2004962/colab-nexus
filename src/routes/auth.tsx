@@ -183,12 +183,19 @@ function AuthPage() {
                   Apply to join
                 </Link>
               </div>
-              {typeof window !== "undefined" && new URLSearchParams(window.location.search).has("bootstrap") && (
-                <Button variant="ghost" size="sm" onClick={handleSeed} disabled={seeding} className="mt-2 w-full text-xs text-muted-foreground">
-                  {seeding ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Crown className="mr-2 h-3 w-3" />}
-                  Bootstrap super admin
-                </Button>
-              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSeed} 
+                disabled={seeding} 
+                className="mt-4 w-full"
+              >
+                {seeding ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Crown className="mr-2 h-3 w-3 text-primary" />}
+                {seeding ? "Creating admin..." : "Setup Super Admin"}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                First time? Create the super admin account to get started
+              </p>
             </CardContent>
           </Card>
         </div>
