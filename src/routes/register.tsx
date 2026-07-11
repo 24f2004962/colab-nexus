@@ -79,6 +79,16 @@ function RegisterPage() {
       3: ["portfolio_url", "github_url", "linkedin_url", "resume_url", "skills", "bio", "experience", "availability"],
     };
     const valid = await form.trigger(fields[step]);
+    
+    // Validate resume is uploaded or URL provided for step 3
+    if (step === 3 && valid) {
+      const hasUrl = form.getValues("resume_url") && form.getValues("resume_url").length > 0;
+      if (!hasUrl && !resumeFile) {
+        toast.error("Please upload a resume or provide a URL");
+        return;
+      }
+    }
+    
     if (valid) setStep((s) => Math.min(s + 1, STEPS.length - 1));
   };
 
@@ -201,9 +211,9 @@ function RegisterPage() {
               )}
               {step === 1 && (
                 <div className="space-y-4 animate-fade-in">
-                  <Field label="Phone (optional)"><Input {...form.register("phone")} placeholder="+91…" /></Field>
-                  <Field label="College / Organization"><Input {...form.register("college")} /></Field>
-                  <Field label="City"><Input {...form.register("city")} /></Field>
+                  <Field label="Phone *" error={form.formState.errors.phone?.message}><Input {...form.register("phone")} placeholder="+91…" /></Field>
+                  <Field label="College / Organization *" error={form.formState.errors.college?.message}><Input {...form.register("college")} placeholder="e.g., Indian Institute of Technology" /></Field>
+                  <Field label="City"><Input {...form.register("city")} placeholder="Your city" /></Field>
                 </div>
               )}
               {step === 2 && (
@@ -222,14 +232,17 @@ function RegisterPage() {
               )}
               {step === 3 && (
                 <div className="space-y-4 animate-fade-in">
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 p-3 text-sm text-amber-900 dark:text-amber-100">
+                    Resume is <strong>required</strong> — Upload a PDF/DOC or provide a link
+                  </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Portfolio URL"><Input {...form.register("portfolio_url")} placeholder="https://…" /></Field>
                     <Field label="GitHub URL"><Input {...form.register("github_url")} placeholder="https://github.com/…" /></Field>
                     <Field label="LinkedIn URL"><Input {...form.register("linkedin_url")} placeholder="https://linkedin.com/…" /></Field>
-                    <Field label="Resume URL (or upload below)"><Input {...form.register("resume_url")} placeholder="Link to PDF" /></Field>
+                    <Field label="Resume URL *" error={form.formState.errors.resume_url?.message}><Input {...form.register("resume_url")} placeholder="Link to PDF (or upload below)" /></Field>
                   </div>
-                  <Field label="Upload resume (PDF/DOC · optional)">
-                    <label className="group relative flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-border bg-surface/50 px-4 py-3 text-sm hover:border-primary/50 transition">
+                  <Field label="Upload resume (PDF/DOC) *" error={!resumeFile && form.formState.isDirty ? "Resume upload required" : undefined}>
+                    <label className={`group relative flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed transition ${resumeFile ? "border-primary bg-primary/5" : "border-border bg-surface/50 hover:border-primary/50"}`}>
                       <input
                         type="file"
                         accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -239,7 +252,7 @@ function RegisterPage() {
                       {resumeFile ? (
                         <>
                           <FileText className="h-4 w-4 text-primary" />
-                          <span className="truncate">{resumeFile.name}</span>
+                          <span className="truncate font-medium">{resumeFile.name}</span>
                           <span className="ml-auto text-xs text-muted-foreground">{Math.round(resumeFile.size / 1024)} KB</span>
                         </>
                       ) : (
@@ -251,8 +264,8 @@ function RegisterPage() {
                     </label>
                   </Field>
                   <Field label="Skills (comma separated)"><Input {...form.register("skills")} placeholder="React, Figma, Marketing…" /></Field>
-                  <Field label="Short bio"><Textarea rows={3} {...form.register("bio")} /></Field>
-                  <Field label="Experience"><Textarea rows={3} {...form.register("experience")} /></Field>
+                  <Field label="Short bio"><Textarea rows={3} {...form.register("bio")} placeholder="Tell us about yourself" /></Field>
+                  <Field label="Experience"><Textarea rows={3} {...form.register("experience")} placeholder="Your professional experience and achievements" /></Field>
                   <Field label="Availability"><Input {...form.register("availability")} placeholder="10 hrs / week" /></Field>
                 </div>
               )}
